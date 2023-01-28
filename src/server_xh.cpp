@@ -1,6 +1,8 @@
 #include "pir.hpp"
 #include "pir_client.hpp"
 #include "pir_server.hpp"
+#include "xh.hpp"
+// #include <stdlib.h>
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
@@ -20,42 +22,24 @@ using namespace std;
 using namespace seal;
 
 int main(int argc, char *argv[]) {
-  // Hyper parameters
-  uint8_t shift_bit_num = 20;
-  int port = 5011;
-  int socket_size = 4 * 1024 * 1024;
-  int socket_recv_size = 128;
-  
+  char socket_buffer[socket_size];
+  uint32_t tmp, recv_len, send_size, batch_num;
   struct sockaddr_in servaddr;
   memset(&servaddr, 0, sizeof(servaddr));
   servaddr.sin_family = AF_INET;
   servaddr.sin_port = htons(port);
+
   int sockfd0 = socket(AF_INET, SOCK_STREAM, 0);
   servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
   bind(sockfd0, (struct sockaddr*)&servaddr, sizeof(servaddr));
   listen(sockfd0, 10);
   int sockfd1 = accept(sockfd0, (struct sockaddr*)NULL, NULL);
   int sockfd2 = accept(sockfd0, (struct sockaddr*)NULL, NULL);
-  char socket_buffer[socket_size];
-
-  uint64_t number_of_items = 1 << shift_bit_num;
-  uint64_t size_per_item = 4; // in bytes
-  uint32_t N = 4096;
-
-  // Recommended values: (logt, d) = (20, 2).
-  uint32_t logt = 20;
-  uint32_t d = 2;
-  bool use_symmetric = true; // use symmetric encryption instead of public key
-                             // (recommended for smaller query)
-  bool use_batching = true;  // pack as many elements as possible into a BFV
-                             // plaintext (recommended)
-  bool use_recursive_mod_switching = true;
 
   EncryptionParameters enc_params(scheme_type::bfv);
   PirParams pir_params;
 
   // Generates all parameters
-
   cout << "Xh: Generating SEAL parameters" << endl;
   gen_encryption_params(N, logt, enc_params);
 
@@ -74,7 +58,6 @@ int main(int argc, char *argv[]) {
   cout << "Xh: Initializing server" << endl;
   PIRServer server(enc_params, pir_params);
 
-  uint32_t tmp, recv_len, send_size, batch_num;
   // Transfer keys
   recv(sockfd1, &tmp, sizeof(tmp), 0);
   recv_len = ntohl(tmp);
@@ -85,6 +68,7 @@ int main(int argc, char *argv[]) {
   }
   string galois_keys_string;
   galois_keys_string.assign(socket_buffer, recv_len);
+
   GaloisKeys galois_keys = *deserialize_galoiskeys(galois_keys_string, make_shared<SEALContext>(enc_params, true));
   cout << "Xh: galois keys deserialized" << endl;
 
@@ -110,13 +94,16 @@ int main(int argc, char *argv[]) {
 
   uint64_t hit_point_num;
   uint64_t hit_index;
-  uint8_t val;
+  uint64_t val;
   cin >> hit_point_num;
+  // cout << "Xh: Hit point number: " << hit_point_num << endl;
   for (uint64_t i = 0; i < hit_point_num; i++) {
     cin >> hit_index;
+    // cout << "Xh: Hit point index: " << hit_index << endl;
     for (uint8_t j = 0; j < size_per_item; j++) {
       cin >> val;
-      db.get()[hit_index + j] = val;
+      db.get()[hit_index * size_per_item + j] = val;
+      // cout << "Xh: Hit point value at " << j << ": " << (int)db.get()[hit_index * size_per_item + j] << endl;
     }
   }
 
@@ -137,9 +124,10 @@ int main(int argc, char *argv[]) {
   for (uint32_t i = 0; i < recv_len; i += socket_recv_size) {
     recv(sockfd1, socket_buffer + i, socket_recv_size, 0);
   }
-  close(sockfd1);
   string query_string;
   query_string.assign(socket_buffer, recv_len);
+
+  close(sockfd1);
   // ofstream os;
   // os.open("serverside", ios::out);
   // os << query_string;
@@ -169,14 +157,14 @@ int main(int argc, char *argv[]) {
   int reply_size = server.serialize_reply(reply, server_stream);
 
   // Transfer replies
-  // send_size = server_stream.str().size();
   send_size = reply_size;
+  tmp = htonl(send_size);
   batch_num = send_size / socket_recv_size;
   if (send_size % socket_recv_size > 0) {
     batch_num += 1;
   }
+
   cout << "Xh: Transfering reply size: " << send_size << endl;
-  tmp = htonl(send_size);
   send(sockfd2, &tmp, sizeof(tmp), 0);
   memset(&socket_buffer, 0, sizeof(socket_buffer));
   memcpy(socket_buffer, server_stream.str().data(), reply_size);

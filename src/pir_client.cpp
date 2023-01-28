@@ -206,12 +206,13 @@ Plaintext PIRClient::decode_reply(PirReply &reply) {
     for (uint32_t j = 0; j < temp.size(); j++) {
       Plaintext ptxt;
       decryptor_->decrypt(temp[j], ptxt);
+
 #ifdef DEBUG
       cout << "Client: reply noise budget = "
            << decryptor_->invariant_noise_budget(temp[j]) << endl;
+      cout << "decoded (and scaled) plaintext = " << ptxt.to_string() << endl;
 #endif
 
-      cout << "decoded (and scaled) plaintext = " << ptxt.to_string() << endl;
       tempplain.push_back(ptxt);
 
 #ifdef DEBUG

@@ -1,7 +1,6 @@
 find_package(SEAL 4.1 REQUIRED)
 
-add_library(sealpir pir.hpp pir.cpp pir_client.hpp pir_client.cpp pir_server.hpp
-  pir_server.cpp)
+add_library(sealpir pir.hpp pir.cpp pir_client.hpp pir_client.cpp pir_server.hpp pir_server.cpp xh.hpp xh.cpp)
 target_link_libraries(sealpir SEAL::seal)
 
 add_executable(main main.cpp)
