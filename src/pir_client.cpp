@@ -174,7 +174,7 @@ std::vector<uint8_t> PIRClient::extract_bytes(seal::Plaintext pt,
 void PIRClient::deserialize_reply(PirReply &reply, stringstream &stream) {
   while (stream.rdbuf()->in_avail() > 0) {
     seal::Ciphertext c;
-    c.load(context_, stream);
+    c.load(*context_, stream);
     reply.push_back(std::move(c));
   }
 }
@@ -211,8 +211,7 @@ Plaintext PIRClient::decode_reply(PirReply &reply) {
            << decryptor_->invariant_noise_budget(temp[j]) << endl;
 #endif
 
-      // cout << "decoded (and scaled) plaintext = " << ptxt.to_string() <<
-      // endl;
+      cout << "decoded (and scaled) plaintext = " << ptxt.to_string() << endl;
       tempplain.push_back(ptxt);
 
 #ifdef DEBUG
@@ -226,12 +225,13 @@ Plaintext PIRClient::decode_reply(PirReply &reply) {
         compose_to_ciphertext(parms, tempplain, combined);
         newtemp.push_back(combined);
         tempplain.clear();
-        // cout << "Client: const term of ciphertext = " << combined[0] << endl;
+        cout << "Client: const term of ciphertext = " << combined[0] << endl;
       }
     }
     cout << "Client: done." << endl;
     cout << endl;
     if (i == recursion_level - 1) {
+      cout << "This should be true: 1 == " << temp.size() << endl;
       assert(temp.size() == 1);
       return tempplain[0];
     } else {

@@ -1,4 +1,6 @@
 #include "pir.hpp"
+// #include <fstream>
+// #include <iostream>
 
 using namespace std;
 using namespace seal;
@@ -372,7 +374,7 @@ PirQuery deserialize_query(uint32_t d, uint32_t count, string s,
   return q;
 }
 
-string serialize_galoiskeys(Serializable<GaloisKeys> g) {
+string serialize_galoiskeys(GaloisKeys& g) {
   std::ostringstream output;
   g.save(output);
   return output.str();
@@ -381,6 +383,10 @@ string serialize_galoiskeys(Serializable<GaloisKeys> g) {
 GaloisKeys *deserialize_galoiskeys(string s, shared_ptr<SEALContext> context) {
   GaloisKeys *g = new GaloisKeys();
   std::istringstream input(s);
+  // ofstream os;
+  // os.open("serverside", ios::out);
+  // os << s;
+  // os.close();
   g->load(*context, input);
   return g;
 }

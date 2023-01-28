@@ -94,7 +94,7 @@ void compose_to_ciphertext(seal::EncryptionParameters params,
                            seal::Ciphertext &ct);
 
 // Serialize and deserialize galois keys to send them over the network
-std::string serialize_galoiskeys(seal::Serializable<seal::GaloisKeys> g);
+std::string serialize_galoiskeys(seal::GaloisKeys &g);
 seal::GaloisKeys *
 deserialize_galoiskeys(std::string s,
                        std::shared_ptr<seal::SEALContext> context);
