@@ -22,7 +22,7 @@ public:
   std::vector<uint64_t> extract_coeffs(seal::Plaintext pt,
                                        std::uint64_t offset);
   std::vector<uint8_t> extract_bytes(seal::Plaintext pt, std::uint64_t offset);
-
+  void deserialize_reply(PirReply &reply, std::stringstream &stream);
   std::vector<uint8_t> decode_reply(PirReply &reply, uint64_t offset);
 
   seal::Plaintext decrypt(seal::Ciphertext ct);

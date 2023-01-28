@@ -171,6 +171,14 @@ std::vector<uint8_t> PIRClient::extract_bytes(seal::Plaintext pt,
                                   (offset + 1) * pir_params_.ele_size);
 }
 
+void PIRClient::deserialize_reply(PirReply &reply, stringstream &stream) {
+  while (stream.rdbuf()->in_avail() > 0) {
+    seal::Ciphertext c;
+    c.load(context_, stream);
+    reply.push_back(std::move(c));
+  }
+}
+
 Plaintext PIRClient::decode_reply(PirReply &reply) {
   EncryptionParameters parms;
   parms_id_type parms_id;
