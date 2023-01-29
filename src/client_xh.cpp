@@ -21,7 +21,8 @@ using namespace std::chrono;
 using namespace std;
 using namespace seal;
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   char socket_buffer[socket_size];
   uint32_t tmp, recv_len, send_size, batch_num;
   int size_socket = sizeof(socket_buffer);
@@ -32,9 +33,9 @@ int main(int argc, char *argv[]) {
 
   inet_pton(AF_INET, "127.0.0.1", &servaddr.sin_addr);
   int sockfd1 = socket(AF_INET, SOCK_STREAM, 0);
-  connect(sockfd1, (struct sockaddr*)&servaddr, sizeof(servaddr));
+  connect(sockfd1, (struct sockaddr *)&servaddr, sizeof(servaddr));
   int sockfd2 = socket(AF_INET, SOCK_STREAM, 0);
-  connect(sockfd2, (struct sockaddr*)&servaddr, sizeof(servaddr));
+  connect(sockfd2, (struct sockaddr *)&servaddr, sizeof(servaddr));
 
   EncryptionParameters enc_params(scheme_type::bfv);
   PirParams pir_params;
@@ -65,7 +66,8 @@ int main(int argc, char *argv[]) {
   send_size = galois_keys_string.size();
   tmp = htonl(send_size);
   batch_num = send_size / socket_recv_size;
-  if (send_size % socket_recv_size > 0) {
+  if (send_size % socket_recv_size > 0)
+  {
     batch_num += 1;
   }
   // ofstream os;
@@ -79,17 +81,20 @@ int main(int argc, char *argv[]) {
   memcpy(socket_buffer, galois_keys_string.data(), send_size);
   cout << "Xh: Transfering key" << endl;
   send(sockfd1, socket_buffer, socket_recv_size * batch_num, 0);
-  
+
   // Choose an index of an element in the DB
   uint64_t ele_index, index, offset;
   stringstream client_stream;
   int query_num, query_size;
+  cout << "Xh: Provide queriers number: " << endl;
   cin >> query_num;
   tmp = htonl(query_num);
   cout << "Xh: Transfering queries number: " << query_num << endl;
   send(sockfd1, &tmp, sizeof(tmp), 0);
 
-  for (int i = 0; i < query_num; i++) {
+  for (int i = 0; i < query_num; i++)
+  {
+    cout << "Xh: Provide element index: " << endl;
     cin >> ele_index;
     cout << "Xh: input element index: " << ele_index << endl;
     index = client.get_fv_index(ele_index);   // index of FV plaintext
@@ -102,14 +107,15 @@ int main(int argc, char *argv[]) {
     query_size = client.generate_serialized_query(index, client_stream);
     auto time_s_query_e = high_resolution_clock::now();
     auto time_s_query_us =
-      duration_cast<microseconds>(time_s_query_e - time_s_query_s).count();
+        duration_cast<microseconds>(time_s_query_e - time_s_query_s).count();
     cout << "Xh: serialized query generated" << endl;
 
     // Transfer queries
     send_size = query_size;
     tmp = htonl(send_size);
     batch_num = send_size / socket_recv_size;
-    if (send_size % socket_recv_size > 0) {
+    if (send_size % socket_recv_size > 0)
+    {
       batch_num += 1;
     }
     // ofstream os;
@@ -124,13 +130,13 @@ int main(int argc, char *argv[]) {
     cout << "Xh: Transfering queries" << endl;
     send(sockfd1, socket_buffer, socket_recv_size * batch_num, 0);
 
-
     // Transfer replies
     recv(sockfd2, &tmp, sizeof(tmp), 0);
     recv_len = ntohl(tmp);
     memset(&socket_buffer, 0, sizeof(socket_buffer));
     cout << "Xh: Receiving replies with expected size " << recv_len << endl;
-    for (uint32_t i = 0; i < recv_len; i += socket_recv_size) {
+    for (uint32_t i = 0; i < recv_len; i += socket_recv_size)
+    {
       recv(sockfd2, socket_buffer + i, socket_recv_size, 0);
     }
     string reply_string;
@@ -158,7 +164,8 @@ int main(int argc, char *argv[]) {
          << " ms" << endl;
     cout << "Xh: Query size: " << query_size << " bytes" << endl;
     cout << "Xh: Reply num ciphertexts: " << reply.size() << endl;
-    for (uint8_t i = 0; i < size_per_item - 1; i++) {
+    for (uint8_t i = 0; i < size_per_item - 1; i++)
+    {
       cerr << (int)elems[i] << ",";
     }
     cerr << (int)elems[size_per_item - 1] << endl;

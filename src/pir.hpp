@@ -11,7 +11,8 @@ typedef std::vector<seal::Plaintext> Database;
 typedef std::vector<std::vector<seal::Ciphertext>> PirQuery;
 typedef std::vector<seal::Ciphertext> PirReply;
 
-struct PirParams {
+struct PirParams
+{
   bool enable_symmetric;
   bool enable_batching;
   bool enable_mswitching;

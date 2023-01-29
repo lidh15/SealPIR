@@ -6,7 +6,8 @@
 
 using namespace std;
 
-class PIRClient {
+class PIRClient
+{
 public:
   PIRClient(const seal::EncryptionParameters &encparms,
             const PirParams &pirparams);

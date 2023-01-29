@@ -6,7 +6,8 @@
 #include <memory>
 #include <vector>
 
-class PIRServer {
+class PIRServer
+{
 public:
   PIRServer(const seal::EncryptionParameters &enc_params,
             const PirParams &pir_params);

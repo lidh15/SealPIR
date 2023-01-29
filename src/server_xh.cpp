@@ -21,7 +21,8 @@ using namespace std::chrono;
 using namespace std;
 using namespace seal;
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
   char socket_buffer[socket_size];
   uint32_t tmp, recv_len, send_size, batch_num;
   struct sockaddr_in servaddr;
@@ -31,10 +32,10 @@ int main(int argc, char *argv[]) {
 
   int sockfd0 = socket(AF_INET, SOCK_STREAM, 0);
   servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-  bind(sockfd0, (struct sockaddr*)&servaddr, sizeof(servaddr));
+  bind(sockfd0, (struct sockaddr *)&servaddr, sizeof(servaddr));
   listen(sockfd0, 10);
-  int sockfd1 = accept(sockfd0, (struct sockaddr*)NULL, NULL);
-  int sockfd2 = accept(sockfd0, (struct sockaddr*)NULL, NULL);
+  int sockfd1 = accept(sockfd0, (struct sockaddr *)NULL, NULL);
+  int sockfd2 = accept(sockfd0, (struct sockaddr *)NULL, NULL);
 
   EncryptionParameters enc_params(scheme_type::bfv);
   PirParams pir_params;
@@ -63,7 +64,8 @@ int main(int argc, char *argv[]) {
   recv_len = ntohl(tmp);
   memset(&socket_buffer, 0, sizeof(socket_buffer));
   cout << "Xh: Receiving galois keys with expected size " << recv_len << endl;
-  for (uint32_t i = 0; i < recv_len; i += socket_recv_size) {
+  for (uint32_t i = 0; i < recv_len; i += socket_recv_size)
+  {
     recv(sockfd1, socket_buffer + i, socket_recv_size, 0);
   }
   string galois_keys_string;
@@ -81,27 +83,32 @@ int main(int argc, char *argv[]) {
   uint64_t hit_point_num, hit_index, val;
   recv(sockfd1, &tmp, sizeof(tmp), 0);
   int query_num = ntohl(tmp);
-  for (int i = 0; i < query_num; i++) {
-  cout << "Xh: Creating the database with sliced data (this may take some "
-          "time) ..."
-       << endl;
+  for (int i = 0; i < query_num; i++)
+  {
+    cout << "Xh: Creating the database with sliced data (this may take some "
+            "time) ..."
+         << endl;
 
     // Create test database
     auto db(make_unique<uint8_t[]>(number_of_items * size_per_item));
     int offset = 0;
-    for (uint64_t i = 0; i < number_of_items; i++) {
+    for (uint64_t i = 0; i < number_of_items; i++)
+    {
       offset += size_per_item;
-      for (uint8_t j = 0; j < size_per_item; j++) {
+      for (uint8_t j = 0; j < size_per_item; j++)
+      {
         db.get()[offset + j] = 255;
       }
     }
 
     cin >> hit_point_num;
     // cout << "Xh: Hit point number: " << hit_point_num << endl;
-    for (uint64_t i = 0; i < hit_point_num; i++) {
+    for (uint64_t i = 0; i < hit_point_num; i++)
+    {
       cin >> hit_index;
       // cout << "Xh: Hit point index: " << hit_index << endl;
-      for (uint8_t j = 0; j < size_per_item; j++) {
+      for (uint8_t j = 0; j < size_per_item; j++)
+      {
         cin >> val;
         db.get()[hit_index * size_per_item + j] = val;
         // cout << "Xh: Hit point value at " << j << ": " << (int)db.get()[hit_index * size_per_item + j] << endl;
@@ -122,7 +129,8 @@ int main(int argc, char *argv[]) {
     recv_len = ntohl(tmp);
     memset(&socket_buffer, 0, sizeof(socket_buffer));
     cout << "Xh: receiving queries with expected size " << recv_len << endl;
-    for (uint32_t i = 0; i < recv_len; i += socket_recv_size) {
+    for (uint32_t i = 0; i < recv_len; i += socket_recv_size)
+    {
       recv(sockfd1, socket_buffer + i, socket_recv_size, 0);
     }
     string query_string;
@@ -160,7 +168,8 @@ int main(int argc, char *argv[]) {
     send_size = reply_size;
     tmp = htonl(send_size);
     batch_num = send_size / socket_recv_size;
-    if (send_size % socket_recv_size > 0) {
+    if (send_size % socket_recv_size > 0)
+    {
       batch_num += 1;
     }
 

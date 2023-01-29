@@ -13,11 +13,11 @@ const int socket_recv_size = 128;
 const uint32_t logt = 20;
 const uint32_t d = 2;
 const bool use_symmetric = true; // use symmetric encryption instead of public key
-                            // (recommended for smaller query)
+                                 // (recommended for smaller query)
 const bool use_batching = true;  // pack as many elements as possible into a BFV
-                            // plaintext (recommended)
+                                 // plaintext (recommended)
 const bool use_recursive_mod_switching = true;
 
 // Socket related
-// void socket_send(int sockfd, const std::string& msg, int send_size, char* socket_buffer, int buffer_size);
-// std::string socket_recv(int sockfd, char* socket_buffer, int buffer_size);
+// void socket_send(int sockfd, const std::string &msg, int send_size, char *socket_buffer, int buffer_size);
+// std::string socket_recv(int sockfd, char *socket_buffer, int buffer_size);
